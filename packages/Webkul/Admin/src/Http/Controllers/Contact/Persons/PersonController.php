@@ -158,7 +158,6 @@ class PersonController extends Controller
             return response()->json([
                 'message' => trans('admin::app.contacts.persons.index.delete-success'),
             ], 200);
-
         } catch (Exception $exception) {
             return response()->json([
                 'message' => trans('admin::app.contacts.persons.index.delete-failed'),

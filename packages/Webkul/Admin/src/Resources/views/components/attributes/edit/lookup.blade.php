@@ -101,7 +101,6 @@
                         class="w-full rounded border border-gray-200 px-2.5 py-2 text-sm font-normal text-gray-800 transition-all hover:border-gray-400 focus:border-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-400 dark:focus:border-gray-400"
                         placeholder="@lang('admin::app.components.attributes.lookup.search')"
                         ref="searchInput"
-                        @keyup="search"
                     />
 
                     <!-- Search Icon (absolute positioned) -->
@@ -182,6 +181,9 @@
                     this.getLookUpEntity();
                 }
 
+                // Load default 5 records
+                this.loadDefaultRecords();
+
                 window.addEventListener('click', this.handleFocusOut);
             },
 
@@ -216,14 +218,32 @@
 
                     if (this.showPopup) {
                         this.$nextTick(() => this.$refs.searchInput.focus());
+
+                        // Load default records when popup opens if not already loaded
+                        if (this.searchedResults.length === 0 && !this.searchTerm) {
+                            this.loadDefaultRecords();
+                        }
                     }
+                },
+
+                loadDefaultRecords() {
+                    this.isSearching = true;
+
+                    this.$axios.get(this.searchRoute, {
+                            params: { query: '' }
+                        })
+                        .then (response => {
+                            // Limit to first 5 records
+                            this.searchedResults = response.data.slice(0, 5);
+                        })
+                        .catch (error => {})
+                        .finally(() => this.isSearching = false);
                 },
 
                 search() {
                     if (this.searchTerm.length <= 2) {
-                        this.searchedResults = [];
-
-                        this.isSearching = false;
+                        // Show default 5 records when search term is cleared
+                        this.loadDefaultRecords();
 
                         return;
                     }

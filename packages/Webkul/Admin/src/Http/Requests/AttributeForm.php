@@ -63,32 +63,33 @@ class AttributeForm extends FormRequest
                 }
 
                 $validations = [
-                    $attribute->code.'.address'  => 'required',
-                    $attribute->code.'.country'  => 'required',
-                    $attribute->code.'.state'    => 'required',
-                    $attribute->code.'.city'     => 'required',
-                    $attribute->code.'.postcode' => 'required',
+                    $attribute->code . '.address'  => 'required',
+                    $attribute->code . '.country'  => 'required',
+                    $attribute->code . '.state'    => 'required',
+                    $attribute->code . '.city'     => 'required',
+                    $attribute->code . '.postcode' => 'required',
                 ];
             } elseif ($attribute->type == 'email') {
                 $validations = [
                     $attribute->code              => [$attribute->is_required ? 'required' : 'nullable'],
-                    $attribute->code.'.*.value'   => [$attribute->is_required ? 'required' : 'nullable', 'email'],
-                    $attribute->code.'.*.label'   => $attribute->is_required ? 'required' : 'nullable',
+                    $attribute->code . '.*.value'   => [$attribute->is_required ? 'required' : 'nullable', 'email'],
+                    $attribute->code . '.*.label'   => $attribute->is_required ? 'required' : 'nullable',
                 ];
             } elseif ($attribute->type == 'phone') {
                 $validations = [
                     $attribute->code              => [$attribute->is_required ? 'required' : 'nullable'],
-                    $attribute->code.'.*.value'   => [$attribute->is_required ? 'required' : 'nullable'],
-                    $attribute->code.'.*.label'   => $attribute->is_required ? 'required' : 'nullable',
+                    $attribute->code . '.*.value'   => [$attribute->is_required ? 'required' : 'nullable'],
+                    $attribute->code . '.*.label'   => $attribute->is_required ? 'required' : 'nullable',
                 ];
             } else {
                 $validations[$attribute->code] = [$attribute->is_required ? 'required' : 'nullable'];
 
                 if ($attribute->type == 'text' && $attribute->validation) {
-                    array_push($validations[$attribute->code],
+                    array_push(
+                        $validations[$attribute->code],
                         $attribute->validation == 'decimal'
-                        ? new Decimal
-                        : $attribute->validation
+                            ? new Decimal
+                            : $attribute->validation
                     );
                 }
 
@@ -96,16 +97,15 @@ class AttributeForm extends FormRequest
                     array_push($validations[$attribute->code], new Decimal);
                 }
 
-                if ($attribute->type == 'image' && ! request($attribute->code.'.delete')) {
+                if ($attribute->type == 'image' && ! request($attribute->code . '.delete')) {
                     array_push($validations[$attribute->code], 'mimes:bmp,jpeg,jpg,png,webp');
                 }
             }
 
             if ($attribute->is_unique) {
                 array_push($validations[in_array($attribute->type, ['email', 'phone'])
-                    ? $attribute->code.'.*.value'
-                    : $attribute->code
-                ], function ($field, $value, $fail) use ($attribute) {
+                    ? $attribute->code . '.*.value'
+                    : $attribute->code], function ($field, $value, $fail) use ($attribute) {
                     if (! $this->attributeValueRepository->isValueUnique($this->id, $attribute->entity_type, $attribute, request($field))) {
                         $fail('The value has already been taken.');
                     }
